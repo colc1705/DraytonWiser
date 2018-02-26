@@ -47,7 +47,7 @@ def updated() {
 
 def initialize() {
 	log.debug "initialize()"
-    //getHubConfig()
+    getHubConfig()
     runEvery1Minute("getHubConfig")
     //getHubUrl("/data/domain/Room")
     //sendMessageToHeatHub("/data/domain/", "GET", "")
@@ -169,7 +169,7 @@ def sendMessageToHeatHub(path, method, content) {
 void calledBackHandler(physicalgraph.device.HubResponse hubResponse) {
     log.debug "Entered calledBackHandler()..."
     log.debug hubResponse.status
-    log.debug "entering action: " + state.action
+    //log.debug "entering action: " + state.action
     
     if (state.action == "test") log.debug hubResponse.json
     
@@ -218,6 +218,8 @@ void calledBackHandler(physicalgraph.device.HubResponse hubResponse) {
         	getChildDevice(app.id + ":HW").setBoost("off")
             getChildDevice(app.id + ":HW").setState("off")
             }
+        if (state.action == "HotWaterOn") getChildDevice(app.id + ":HW").setState("on")
+        if (state.action == "HotWaterOff") getChildDevice(app.id + ":HW").setState("off")
         
     }
     if (hubResponse.status == 403) {
@@ -230,7 +232,7 @@ void calledBackHandler(physicalgraph.device.HubResponse hubResponse) {
         
     }
     
-    log.debug "exiting action " + state.action
+    //log.debug "exiting action " + state.action
 }
 
 private void createChildDevices(rooms, hotwater) {
@@ -375,6 +377,23 @@ def setHotWaterBoost(boostTime) {
     }
     sendMessageToHeatHub(getHotwaterEndpoint() + "2", "PATCH", payload)
 }
+
+def turnHotWaterOn() {
+	log.debug "turnHotWateOn()"
+    def payload
+    state.action = "HotWaterOn"
+    payload = "{\"RequestOverride\":{\"Type\":\"Manual\",\"SetPoint\":1100}}"
+    sendMessageToHeatHub(getHotwaterEndpoint() + "2", "PATCH", payload)
+}
+
+def turnHotWaterOff() {
+	log.debug "turnHotWateOff()"
+    def payload
+    state.action = "HotWaterOff"
+    payload = "{\"RequestOverride\":{\"Type\":\"Manual\",\"SetPoint\":-200}}"
+    sendMessageToHeatHub(getHotwaterEndpoint() + "2", "PATCH", payload)
+}
+
 
 private delayAction(long time) {
 	new physicalgraph.device.HubAction("delay $time")
