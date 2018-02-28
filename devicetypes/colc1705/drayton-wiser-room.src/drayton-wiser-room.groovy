@@ -7,6 +7,7 @@ metadata {
         
         attribute "mode", "string"
         attribute "boost", "string"
+        attribute "outputState", "string"
         
         command "spDown"
         command "spUp"
@@ -63,12 +64,17 @@ metadata {
             state "on", label: 'Boost ${currentValue}', action: "boostOff", backgroundColor: "#00A042"
         }
         
+        valueTile("outputState", "device.outputState", decoration: "flat", width: 2, height: 2) {
+        	state "on", label: "On", icon: "st.Home.home1", backgroundColor: "#ef7c17"
+            state "off", label: "Off", icon: "st.Home.home1"
+        }
+        
         standardTile("test", "device.getHubConfig", decoration: "flat", height: 2, width: 2, inactiveLabel: false) {
             state "default", label:"Test", action:"test", icon:"", backgroundColor:"#FFFFFF"
         }
         
         main(["thermostatMulti"])
-        details(["thermostatMulti","mode","boost"])
+        details(["thermostatMulti","mode","boost","outputState"])
 	}
 }
 
@@ -150,4 +156,9 @@ def boostOn() {
 def boostOff() {
 	log.debug "boostOff()"
 	parent.setRoomBoost(device.deviceNetworkId,0,0)
+}
+
+def setOutputState(outputState) {
+	log.debug "setOutputState($outputState)"
+    sendEvent(name: "outputState", value: outputState)
 }

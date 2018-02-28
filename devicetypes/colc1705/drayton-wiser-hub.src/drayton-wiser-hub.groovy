@@ -38,7 +38,7 @@ metadata {
         
         standardTile("mode", "device.mode", inactiveLabel: false, decoration: "flat", width: 3, height: 3) {
         	state "away", label: "Away", action: "homeMode", icon: "st.Transportation.transportation2"
-            state "home", label: "Home", action: "awayMode", icon: "st.Home.home1"
+            state "home", label: "Home", action: "awayMode", icon: "st.Home.home2"
         }
         
         standardTile("test", "device.test", decoration: "flat", height: 2, width: 2, inactiveLabel: false) {
