@@ -6,12 +6,15 @@ metadata {
         capability "Refresh"
         
         attribute "mode", "string"
+        attribute "boost", "string"
         
         command "spDown"
         command "spUp"
         command "manualMode"
         command "autoMode"
         command "test"
+        command "boostOn"
+        command "boostOff"
         
         
 	}
@@ -52,7 +55,8 @@ metadata {
         }
         
         standardTile("boost", "device.boost", decoration: "flat", width: 2, height: 2) {
-        	state "off", label: 'Boost ${currentValue}', action: "boost"
+        	state "off", label: 'Boost ${currentValue}', action: "boostOn"
+            state "on", label: 'Boost ${currentValue}', action: "boostOff", backgroundColor: "#00A042"
         }
         
         standardTile("test", "device.getHubConfig", decoration: "flat", height: 2, width: 2, inactiveLabel: false) {
@@ -112,6 +116,11 @@ def setMode(mode) {
 	log.debug "setMode($mode)"
     sendEvent(name: "mode", value: mode)
 }
+
+def setBoost(boost) {
+	log.debug "setBoost($boost)"
+    sendEvent(name: "boost", value: boost)
+}
     
 def autoMode() {
 	log.debug "autoMode()"
@@ -121,4 +130,17 @@ def autoMode() {
 def manualMode() {
 	log.debug "manualMode()"
     parent.setRoomManualMode(device.deviceNetworkId, true)
+}
+
+def boostOn() {
+	log.debug "boostOn()"
+    def currentTemp = device.currentState("temperature").getDoubleValue()
+    currentTemp = 0.5*(Math.round(currentTemp/0.5))
+    def setPoint = currentTemp + 2
+	parent.setRoomBoost(device.deviceNetworkId,30,setPoint)
+}
+
+def boostOff() {
+	log.debug "boostOff()"
+	parent.setRoomBoost(device.deviceNetworkId,0,0)
 }
