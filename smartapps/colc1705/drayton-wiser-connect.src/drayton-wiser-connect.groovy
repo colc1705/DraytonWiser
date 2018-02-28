@@ -107,6 +107,11 @@ def refreshChild(dni) {
                 	
                     child.setTemp(room.CalculatedTemperature/10, room.CurrentSetPoint/10)
                     child.setMode(room.Mode)
+                    if (room.OverrideTimeoutUnixTime) {
+                    	child.setBoost("On")
+                    } else {
+                    	child.setBoost("Off")
+                    }
                     roomStatId = room.RoomStatId
                     if (roomStatId) child.setHumidity(getHumidity(roomStatId))
                 }
@@ -240,6 +245,15 @@ void calledBackHandler(physicalgraph.device.HubResponse hubResponse) {
             }
         if (state.action == "HotWaterOn") getChildDevice(app.id + ":HW").setState("on")
         if (state.action == "HotWaterOff") getChildDevice(app.id + ":HW").setState("off")
+        
+        if (state.action == "roomBoostOn") {
+        	state.action = "refreshChildren"
+            getHubUrl("/data/domain/")
+        }
+        if (state.action == "roomBoostOff") {
+        	state.action = "refreshChildren"
+            getHubUrl("/data/domain/")
+        }
         
     }
     if (hubResponse.status == 403) {
@@ -389,9 +403,18 @@ def setRoomManualMode(dni, manualMode) {
         return [sendMessageToHeatHub(getRoomsEndpoint() + roomId.toString(), "PATCH", payload), delayAction(1000), sendMessageToHeatHub(getRoomsEndpoint() + roomId.toString(), "PATCH", payload)]
 }
 
-def setRoomBoost(dni, boostTime) {
-	log.debug "setRoomBoost($dni, $boostTime)"
-    
+def setRoomBoost(dni, boostTime, temp) {
+	log.debug "setRoomBoost($dni, $boostTime, $temp)"
+    def roomId = dni.split(":")[1]
+    def payload
+    if (boostTime == 0) {
+    	state.action = "roomBoostOff"
+        payload = "{\"RequestOverride\":{\"Type\":\"None\",\"Originator\":\"App\",\"DurationMinutes\":0,\"SetPoint\":0}}"
+    } else {
+    	state.action = "roomBoostOn"
+        payload = "{\"RequestOverride\":{\"Type\":\"Manual\",\"Originator\":\"App\", \"DurationMinutes\":" + boostTime + ", \"SetPoint\":"+ (temp * 10).toInteger().toString() + "}}"
+    }
+    sendMessageToHeatHub(getRoomsEndpoint() + roomId.toString(), "PATCH", payload)
 }
 
 def setHotWaterBoost(boostTime) {
