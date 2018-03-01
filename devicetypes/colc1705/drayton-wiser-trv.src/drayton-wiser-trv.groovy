@@ -1,4 +1,3 @@
-
 metadata {
 	definition (name: "Drayton Wiser TRV", namespace: "colc1705", author: "Colin Chapman") {
 		capability "Thermostat"

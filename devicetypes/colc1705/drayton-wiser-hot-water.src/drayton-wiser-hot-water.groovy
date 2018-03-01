@@ -1,4 +1,3 @@
-
 metadata {
 	definition (name: "Drayton Wiser Hot Water", namespace: "colc1705", author: "Colin Chapman") {
 		capability "Switch"
