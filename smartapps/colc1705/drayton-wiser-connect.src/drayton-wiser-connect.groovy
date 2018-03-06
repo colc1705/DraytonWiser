@@ -107,7 +107,8 @@ def refreshChild(dni) {
                 	
                     child.setTemp(room.CalculatedTemperature/10, room.CurrentSetPoint/10)
                     child.setMode(room.Mode)
-                    child.setOutputState(room.ControlOutputState)
+                    //child.setOutputState(room.ControlOutputState)
+                    child.setDemand(room.PercentageDemand)
                     if (room.OverrideTimeoutUnixTime) {
                     	child.setBoost("On")
                     } else {
