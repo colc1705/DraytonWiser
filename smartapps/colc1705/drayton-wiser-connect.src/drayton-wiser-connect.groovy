@@ -217,6 +217,7 @@ void calledBackHandler(physicalgraph.device.HubResponse hubResponse) {
     	
     
     if (hubResponse.status == 200) {
+    	if (state.action.contains("setPoint")) runIn(3, "getHubConfig")
     	if (state.action == "ecoOn") getChildDevice(app.id + ":HUB").setEco(true)
     	if (state.action == "ecoOff") getChildDevice(app.id + ":HUB").setEco(false)
         if (state.action.contains("changeroomManualMode")) {
@@ -346,7 +347,7 @@ void setPoint(dni, setPoint) {
       	log.debug "This is the hotwater"
         
     } else {
-    	state.action = "setPoint" + roomId
+    	state.action = "setPoint:" + roomId
         def payload
         payload = "{\"RequestOverride\":{\"Type\":\"Manual\", \"SetPoint\":" + newSP.toInteger().toString() + "}}"
         sendMessageToHeatHub(getRoomsEndpoint() + roomId.toString(), "PATCH", payload)
