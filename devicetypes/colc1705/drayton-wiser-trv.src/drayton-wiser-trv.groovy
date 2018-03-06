@@ -6,7 +6,7 @@ metadata {
         
         attribute "mode", "string"
         attribute "boost", "string"
-        attribute "outputState", "string"
+        attribute "demand", "number"
         
         command "spDown"
         command "spUp"
@@ -59,9 +59,9 @@ metadata {
             state "on", label: 'Boost ${currentValue}', action: "boostOff", backgroundColor: "#00A042"
         }
         
-        valueTile("outputState", "device.outputState", decoration: "flat", width: 2, height: 2) {
-        	state "on", label: "On", icon: "st.Home.home1", backgroundColor: "#ef7c17"
-            state "off", label: "Off", icon: "st.Home.home1"
+        valueTile("demand", "device.demand", decoration: "flat", width: 2, height: 2) {
+        	state "default", label: '${currentValue}%', unit: "%", backgroundColors: [[value:0, color: '#ffffff'],[value:10, color: '#153591'], [value: 30, color: '#1e9cbb'], [value: 50, color: '#90d2a7'], [value: 60, color: '#44b621'], [value: 80, color: '#f1d801'], [value: 90, color: '#D04E00'], [value:100, color: '#bc2323']]
+            
         }
         
         standardTile("test", "device.getHubConfig", decoration: "flat", height: 2, width: 2, inactiveLabel: false) {
@@ -69,7 +69,7 @@ metadata {
         }
         
         main(["thermostatMulti"])
-        details(["thermostatMulti","mode","boost","outputState"])
+        details(["thermostatMulti","mode","boost","demand"])
 	}
 }
 
@@ -153,4 +153,9 @@ def boostOff() {
 def setOutputState(outputState) {
 	log.debug "setOutputState($outputState)"
     sendEvent(name: "outputState", value: outputState)
+}
+
+def setDemand(demand) {
+	log.debug "setDemand($demand)"
+    sendEvent(name: "demand", value: demand)
 }
