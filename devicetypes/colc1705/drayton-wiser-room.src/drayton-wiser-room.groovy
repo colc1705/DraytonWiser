@@ -4,6 +4,7 @@ metadata {
         capability "Actuator"
         capability "Relative Humidity Measurement"
         capability "Refresh"
+        capability "Thermostat"
         
         attribute "mode", "string"
         attribute "boost", "string"
