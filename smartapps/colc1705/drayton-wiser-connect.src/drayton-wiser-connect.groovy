@@ -59,7 +59,8 @@ def mainPage() {
         section("Title") {
             input("hubIP", "string", title: "Hub IP address", description: "", required: true)
             input("systemSecret", "string", title: "Hub Secret", required: true)
-            
+            input("heatingBoost", "number", title: "Minutes for heating boost", required: false, defaultValue: 30)
+            input("waterBoost", "number", title: "Minutes for hot water boost", required: false, defaultValue: 60)
         }
     }
   }
@@ -407,29 +408,31 @@ def setRoomManualMode(dni, manualMode) {
 }
 
 def setRoomBoost(dni, boostTime, temp) {
-	log.debug "setRoomBoost($dni, $boostTime, $temp)"
     def roomId = dni.split(":")[1]
     def payload
     if (boostTime == 0) {
     	state.action = "roomBoostOff"
         payload = "{\"RequestOverride\":{\"Type\":\"None\",\"Originator\":\"App\",\"DurationMinutes\":0,\"SetPoint\":0}}"
     } else {
+    	boostTime = heatingBoost
     	state.action = "roomBoostOn"
         payload = "{\"RequestOverride\":{\"Type\":\"Manual\",\"Originator\":\"App\", \"DurationMinutes\":" + boostTime + ", \"SetPoint\":"+ (temp * 10).toInteger().toString() + "}}"
     }
+    log.debug "setRoomBoost($dni, $boostTime, $temp)"
     sendMessageToHeatHub(getRoomsEndpoint() + roomId.toString(), "PATCH", payload)
 }
 
 def setHotWaterBoost(boostTime) {
-	log.debug "setHotWaterBoost($dni, $boostTime)"
     def payload
     if (boostTime == 0) {
     	state.action = "hwBoostOff"
     	payload = "{\"RequestOverride\":{\"Type\":\"None\",\"Originator\":\"App\",\"DurationMinutes\":" + boostTime + ",\"SetPoint\":0}}"	
     } else {
+    	boostTime = waterBoost
     	state.action = "hwBoostOn"
     	payload = "{\"RequestOverride\":{\"Type\":\"Manual\",\"Originator\":\"App\",\"DurationMinutes\":" + boostTime + ",\"SetPoint\":1100}}"
     }
+    log.debug "setHotWaterBoost($dni, $boostTime)"
     sendMessageToHeatHub(getHotwaterEndpoint() + "2", "PATCH", payload)
 }
 
