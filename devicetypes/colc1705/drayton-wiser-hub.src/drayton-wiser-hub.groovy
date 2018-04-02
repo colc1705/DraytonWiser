@@ -56,49 +56,49 @@ metadata {
 
 
 def parse(description) {
-    log.debug "parse()"
+    logEvent("parse()")
 
 
 }
 
 def initialize() {
-	log.debug "Initializing"
+	logEvent("Initializing")
 	//state.json
     //state.action
 }
 
 
 def installed() {
-	log.debug "Executing installed()"
+	logEvent("Executing installed()")
     //createChildDevices()
     //response(refresh() + configure())
 }
 
 def configure() {
-	log.debug "Executing configure()"
+	logEvent("Executing configure()")
     
 }
     
     
 def refresh() {
-	log.debug "Executing refresh()"
+	logEvent("Executing refresh()")
    
 }
 
 def updated() {
-	log.debug "Executing updated()"
+	logEvent("Executing updated()")
     
 	
 }
 
 def test() {
-	log.debug "test()"
+	logEvent("test()")
     parent.test(device.deviceNetworkId)
     
 }
 
 def setEco(ecoMode) {
-	log.debug "setEco($ecoMode)"
+	logEvent("setEco($ecoMode)")
     if (ecoMode) {
     	sendEvent(name: "eco", value: "on")
     } else {
@@ -107,7 +107,7 @@ def setEco(ecoMode) {
 }
 
 def setMode(mode) {
-	log.debug "setMode($mode)"
+	logEvent("setMode($mode)")
     if (mode == "Away") {
     	sendEvent(name: "mode", value: "away")
     } else {
@@ -117,21 +117,29 @@ def setMode(mode) {
 }
 
 def ecoOn() {
-	log.debug "ecoOn()"
+	logEvent("ecoOn()")
     parent.setEcoMode(true)
 }
     
 def ecoOff() {
-	log.debug "ecoOff()"
+	logEvent("ecoOff()")
     parent.setEcoMode(false)
 }
 
 def homeMode() {
-	log.debug "homeMode()"
+	logEvent("homeMode()")
     parent.setAwayMode(false)
 }
 
 def awayMode() {
-	log.debug "awayMode()"
+	logEvent("awayMode()")
     parent.setAwayMode(true)
+}
+
+def logEvent(event) {
+	if (parent.showDebugInfo()) {
+    	log.debug event
+    } else {
+    	//log.debug "Logging disabled"
+    }
 }

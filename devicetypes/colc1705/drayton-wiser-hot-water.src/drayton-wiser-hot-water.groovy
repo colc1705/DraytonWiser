@@ -39,56 +39,64 @@ metadata {
 
 // parse events into attributes
 def parse(String description) {
-	log.debug "Parsing '${description}'"
+	logEvent("Parsing '${description}'")
 
 }
 
 // handle commands
 
 def on() {
-	log.debug "on()"
+	logEvent("on()")
     parent.turnHotWaterOn()
     
 }
 
 def off() {
-	log.debug "off()"
+	logEvent("off()")
 	parent.turnHotWaterOff()
 }
 
 
 def setState(state) {
-	log.debug "setState($state)"
+	logEvent("setState($state)")
     sendEvent(name: "switch", value: state)
     }
 
 def setMode(mode) {
-	log.debug "setMode(${mode})"
+	logEvent("setMode(${mode})")
     sendEvent(name: "mode", value: mode)
 
 }
 
 def setBoost(boost) {
-	log.debug "setBoost($boost)"
+	logEvent("setBoost($boost)")
     sendEvent(name: "boost", value: boost)
 }
 
 def manualMode() {
-	log.debug "manualMode()"
+	logEvent("manualMode()")
     parent.setHotWaterManualMode(true)
 }
 
 def autoMode() {
-	log.debug "autoMode()"
+	logEvent("autoMode()")
     parent.setHotWaterManualMode(false)
 }
 
 def boostOn() {
-	log.debug "boostOn()"
+	logEvent("boostOn()")
 	parent.setHotWaterBoost(30)
 }
 
 def boostOff() {
-	log.debug "boostOff()"
+	logEvent("boostOff()")
 	parent.setHotWaterBoost(0)
+}
+
+def logEvent(event) {
+	if (parent.showDebugInfo()) {
+    	log.debug event
+    } else {
+    	//log.debug "Logging disabled"
+    }
 }

@@ -80,74 +80,74 @@ metadata {
 }
 
 def updated() {
-	log.debug "updated()"
+	logEvent("updated()")
    
 }
 
 def parse(String description) {
-	log.debug "parse()"
+	logEvent("parse()")
 }
 
 def test() {
-	log.debug "test()"
-    
-    parent.test(device.deviceNetworkId)
+	logEvent("test()")
+    logEvent("debugging on? " + parent.showDebugInfo())
+    //parent.test(device.deviceNetworkId)
 }
 
 def spUp() {
-	log.debug "spUp()"
+	logEvent("spUp()")
     def currentSP = device.currentState("heatingSetPoint").getDoubleValue()
     def newSP = currentSP + 0.5
-    log.debug "Current setting: " + currentSP
+    logEvent("Current setting: " + currentSP)
     sendEvent(name: "heatingSetPoint", value: newSP, unit: "°C")
     parent.setPoint(device.deviceNetworkId, newSP)
     
 }
 
 def spDown() {
-	log.debug "spDown()"
+	logEvent("spDown()")
     def currentSP = device.currentState("heatingSetPoint").getDoubleValue()
     def newSP = currentSP - 0.5
-    log.debug "Current setting: " + currentSP
+    logEvent("Current setting: " + currentSP)
     sendEvent(name: "heatingSetPoint", value: newSP, unit: "°C")
     parent.setPoint(device.deviceNetworkId, newSP)
 }
 
 def setTemp(temp, setPoint) {
- 	log.debug device.name + " is " + temp + "°C"
+ 	logEvent(device.name + " is " + temp + "°C")
     sendEvent(name: "temperature", value: temp, unit: "°C")
     sendEvent(name: "heatingSetPoint", value: setPoint, unit: "°C")
     
 }
 
 def setHumidity(humidity) {
-	log.debug "setHumidity($humidity)"
+	logEvent("setHumidity($humidity)")
     sendEvent(name: "humidity", value: humidity, unit: "%")
 
 }
 
 def setMode(mode) {
-	log.debug "setMode($mode)"
+	logEvent("setMode($mode)")
     sendEvent(name: "mode", value: mode)
 }
 
 def setBoost(boost) {
-	log.debug "setBoost($boost)"
+	logEvent("setBoost($boost)")
     sendEvent(name: "boost", value: boost)
 }
     
 def autoMode() {
-	log.debug "autoMode()"
+	logEvent("autoMode()")
     parent.setRoomManualMode(device.deviceNetworkId, false)
 }
 
 def manualMode() {
-	log.debug "manualMode()"
+	logEvent("manualMode()")
     parent.setRoomManualMode(device.deviceNetworkId, true)
 }
 
 def boostOn() {
-	log.debug "boostOn()"
+	logEvent("boostOn()")
     def currentTemp = device.currentState("temperature").getDoubleValue()
     currentTemp = 0.5*(Math.round(currentTemp/0.5))
     def setPoint = currentTemp + 2
@@ -155,16 +155,24 @@ def boostOn() {
 }
 
 def boostOff() {
-	log.debug "boostOff()"
+	logEvent("boostOff()")
 	parent.setRoomBoost(device.deviceNetworkId,0,0)
 }
 
 def setOutputState(outputState) {
-	log.debug "setOutputState($outputState)"
+	logEvent("setOutputState($outputState)")
     sendEvent(name: "outputState", value: outputState)
 }
 
 def setDemand(demand) {
-	log.debug "setDemand($demand)"
+	logEvent("setDemand($demand)")
     sendEvent(name: "demand", value: demand)
+}
+
+def logEvent(event) {
+	if (parent.showDebugInfo()) {
+    	log.debug event
+    } else {
+    	//log.debug "Logging disabled"
+    }
 }
