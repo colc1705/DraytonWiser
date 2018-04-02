@@ -33,20 +33,20 @@ preferences {
 }
 
 def installed() {
-	log.debug "Installed with settings: ${settings}"
+	if (showDebug) log.debug "Installed with settings: ${settings}"
 
 	initialize()
 }
 
 def updated() {
-	log.debug "Updated with settings: ${settings}"
+	if (showDebug) log.debug "Updated with settings: ${settings}"
 	unschedule()
 	unsubscribe()
 	initialize()
 }
 
 def initialize() {
-	log.debug "initialize()"
+	if (showDebug) log.debug "initialize()"
     getHubConfig()
     runEvery1Minute("getHubConfig")
     //getHubUrl("/data/domain/Room")
@@ -54,26 +54,31 @@ def initialize() {
 }
 
 def mainPage() {
-	log.debug "mainPage"
+	if (showDebug) log.debug "mainPage"
     return dynamicPage(name: "mainPage", title: "", install: true, uninstall: true) {
         section("Title") {
             input("hubIP", "string", title: "Hub IP address", description: "", required: true)
             input("systemSecret", "string", title: "Hub Secret", required: true)
             input("heatingBoost", "number", title: "Minutes for heating boost", required: false, defaultValue: 30)
             input("waterBoost", "number", title: "Minutes for hot water boost", required: false, defaultValue: 60)
+            input("showDebug","bool", title: "Show debugging info", required: true, defaultValue: false)
         }
     }
   }
   
+def showDebugInfo() {
+	return showDebug
+    }
+  
 def test(dni = null) {
-	log.debug "smartapp test($dni)"
+	if (showDebug) log.debug "smartapp test($dni)"
     refreshAllChildren()
     //state.action = "test"
     //getHubUrl("/data/domain/HotWater")
 }
 
 def refreshHub(dni) {
-	log.debug "refreshHub()"
+	if (showDebug) log.debug "refreshHub()"
     if (dni == null) dni = app.id + ":HUB"
     def child = getChildDevice(dni)
     //log.debug state.hubConfig.System.EcoModeEnabled
@@ -84,14 +89,14 @@ def refreshHub(dni) {
 }
 
 def refreshChild(dni) {
-	log.debug "refreshChild($dni)"
+	if (showDebug) log.debug "refreshChild($dni)"
 	def roomId = dni.split(":")[1]
     def child = getChildDevice(dni)
     def roomStatId
     //log.debug roomId
     
 	if (roomId == "HW") {
-    	//log.debug "Update Hot Water"
+    	//if (showDebug) log.debug "Update Hot Water"
         def hotWater = state.hubConfig.HotWater[0]
         child.setState(hotWater.WaterHeatingState)
         child.setMode(hotWater.Mode)
@@ -101,7 +106,7 @@ def refreshChild(dni) {
         	child.setBoost("Off")
         }
     } else {
-    	//log.debug "Update room id{$roomId}"
+    	//if (showDebug) log.debug "Update room id{$roomId}"
         def rooms = state.hubConfig.Room
         rooms.each { room ->
             	if (roomId == room.id.toString()) {
@@ -123,7 +128,7 @@ def refreshChild(dni) {
 }
 
 def refreshAllChildren() {
-	log.debug "refreshAllChildren()"
+	if (showDebug) log.debug "refreshAllChildren()"
     def children = getChildDevices()
     
     children.each { child ->
@@ -136,7 +141,7 @@ def refreshAllChildren() {
 }
 
 def getHubConfig() {
-	log.debug "getHubConfig()"
+	if (showDebug) log.debug "getHubConfig()"
     
     def result = new physicalgraph.device.HubAction(
     	method: "GET",
@@ -153,7 +158,7 @@ def getHubConfig() {
 }
 
 def getHubUrl(path) {
-	log.debug "getHubUrl($path)"
+	if (showDebug) log.debug "getHubUrl($path)"
     
     def result = new physicalgraph.device.HubAction(
     	method: "GET",
@@ -170,7 +175,7 @@ def getHubUrl(path) {
 }
 
 def sendMessageToHeatHub(path, method, content) {
-	log.debug "sendMessageToHeatHub($path, $method, $content)"
+	if (showDebug) log.debug "sendMessageToHeatHub($path, $method, $content)"
     
    def result = new physicalgraph.device.HubAction(
     	method: method,
@@ -189,9 +194,9 @@ def sendMessageToHeatHub(path, method, content) {
 
 
 void calledBackHandler(physicalgraph.device.HubResponse hubResponse) {
-    log.debug "Entered calledBackHandler()..."
-    log.debug hubResponse.status
-    //log.debug "entering action: " + state.action
+    if (showDebug) log.debug "Entered calledBackHandler()..."
+    if (showDebug) log.debug hubResponse.status
+    //if (showDebug) log.debug "entering action: " + state.action
     
     if (state.action == "test") log.debug hubResponse.json
     
@@ -201,10 +206,10 @@ void calledBackHandler(physicalgraph.device.HubResponse hubResponse) {
 		def rooms = state.hubConfig.Room   
    
    		if (state.hubConfig.HotWater) {
-  		  	log.debug "Got hot water"
+  		  	if (showDebug) log.debug "Got hot water"
    		    createChildDevices(rooms, true)
   		} else {
-    		log.debug "No hot water"
+    		if (showDebug) log.debug "No hot water"
     		createChildDevices(rooms, false)
     	}
     
@@ -279,25 +284,25 @@ void calledBackHandler(physicalgraph.device.HubResponse hubResponse) {
         
     }
     
-    //log.debug "exiting action " + state.action
+    //if (showDebug) log.debug "exiting action " + state.action
 }
 
 private void createChildDevices(rooms, hotwater) {
-	log.debug "createChildDevices()"
+	if (showDebug) log.debug "createChildDevices()"
     def children = getChildDevices().deviceNetworkId
     def child
     def dni
     
     dni = app.id + ":HUB"
     if (children.contains(dni)) {
-    	log.debug "Device ${dni} already exists"
+    	if (showDebug) log.debug "Device ${dni} already exists"
         refreshHub(dni)
     } else {
     	try {
         	child = addChildDevice(app.namespace, "Drayton Wiser Hub", dni, null, ["label": "Drayton Hub"]) 
             refreshHub(dni)
         } catch (e) {
-        	log.debug "Error creating child device ${e}"
+        	if (showDebug) log.debug "Error creating child device ${e}"
         }
     }
     
@@ -306,7 +311,7 @@ private void createChildDevices(rooms, hotwater) {
     	def dh
     	dni = app.id + ":" + room.id
         if (children.contains(dni)) {
-        	log.debug "Device ${dni} already exists"
+        	if (showDebug) log.debug "Device ${dni} already exists"
             refreshChild(dni)
         } else {
         	try {
@@ -316,7 +321,7 @@ private void createChildDevices(rooms, hotwater) {
                 //child.setTemp(room.CalculatedTemperature/10, room.CurrentSetPoint/10)
                 refreshChild(dni)
         	} catch(e) {
-        		log.debug "Error creating child device ${e}"
+        		if (showDebug) log.debug "Error creating child device ${e}"
         	}
         }
     }
@@ -325,7 +330,7 @@ private void createChildDevices(rooms, hotwater) {
     if (hotwater) {
     	dni = app.id + ":HW"
         if (children.contains(dni)) {
-        	log.debug "Device ${dni} already exists"
+        	if (showDebug) log.debug "Device ${dni} already exists"
             refreshChild(dni)
         } else {
     		try {
@@ -333,19 +338,19 @@ private void createChildDevices(rooms, hotwater) {
                 //child.setState(state.json.HotWater.WaterHeatingState)
                 refreshChild(dni)
 			} catch(e) {
-    			log.debug "Error creating child device ${e}"
+    			if (showDebug) log.debug "Error creating child device ${e}"
     		}
         }
     }
 }
 
 void setPoint(dni, setPoint) {
-	log.debug "setPoint($dni, $setPoint)"
+	if (showDebug) log.debug "setPoint($dni, $setPoint)"
 	def roomId = dni.split(":")[1]
-    //log.debug roomId
+    //if (showDebug) log.debug roomId
     def newSP = setPoint * 10
     if (roomId == "HW" ) {
-      	log.debug "This is the hotwater"
+      	if (showDebug) log.debug "This is the hotwater"
         
     } else {
     	state.action = "setPoint:" + roomId
@@ -357,7 +362,7 @@ void setPoint(dni, setPoint) {
 }
 
 def setAwayMode(awayMode) {
-	log.debug "setAwayMode($awayMode)"
+	if (showDebug) log.debug "setAwayMode($awayMode)"
 	def payload
     def payload2
 	payload = "{\"Type\":" + (awayMode ? "2" : "0") + ",\"Originator\": \"App\", \"setPoint\":" + (awayMode ? "50" : "0") + "}"
@@ -367,7 +372,7 @@ def setAwayMode(awayMode) {
 }
 
 def setHotWaterManualMode(manualMode) {
-	log.debug "setHotWaterManualMode($manualMode)"
+	if (showDebug) log.debug "setHotWaterManualMode($manualMode)"
 	def payload
     def payload2
     payload = "{\"Mode\":\"" + (manualMode ? "Manual" : "Auto") + "\"}"
@@ -377,7 +382,7 @@ def setHotWaterManualMode(manualMode) {
 }
 
 def setEcoMode(ecoMode) {
-		log.debug "setEcoMode($ecoMode)"
+		if (showDebug) log.debug "setEcoMode($ecoMode)"
 		def payload
         payload = "{\"EcoModeEnabled\":" + ecoMode + "}";
         state.action = (ecoMode ? "ecoOn" : "ecoOff")
@@ -386,7 +391,7 @@ def setEcoMode(ecoMode) {
 }
 
 def getHumidity(roomStatId) {
-	log.debug "getHumidity($roomStatId)"
+	if (showDebug) log.debug "getHumidity($roomStatId)"
     for (HashMap roomStat : state.hubConfig.RoomStat) {
     	if (roomStatId.toString().equals(roomStat.id.toString())) {
         	return roomStat.MeasuredHumidity
@@ -397,7 +402,7 @@ def getHumidity(roomStatId) {
 }
 
 def setRoomManualMode(dni, manualMode) {
-        log.debug "setRoomManualMode($dni, $manualMode)"
+        if (showDebug) log.debug "setRoomManualMode($dni, $manualMode)"
 		def roomId = dni.split(":")[1]
         def payload
         def payload2
@@ -418,7 +423,7 @@ def setRoomBoost(dni, boostTime, temp) {
     	state.action = "roomBoostOn"
         payload = "{\"RequestOverride\":{\"Type\":\"Manual\",\"Originator\":\"App\", \"DurationMinutes\":" + boostTime + ", \"SetPoint\":"+ (temp * 10).toInteger().toString() + "}}"
     }
-    log.debug "setRoomBoost($dni, $boostTime, $temp)"
+    if (showDebug) log.debug "setRoomBoost($dni, $boostTime, $temp)"
     sendMessageToHeatHub(getRoomsEndpoint() + roomId.toString(), "PATCH", payload)
 }
 
@@ -432,12 +437,12 @@ def setHotWaterBoost(boostTime) {
     	state.action = "hwBoostOn"
     	payload = "{\"RequestOverride\":{\"Type\":\"Manual\",\"Originator\":\"App\",\"DurationMinutes\":" + boostTime + ",\"SetPoint\":1100}}"
     }
-    log.debug "setHotWaterBoost($dni, $boostTime)"
+    if (showDebug) log.debug "setHotWaterBoost($dni, $boostTime)"
     sendMessageToHeatHub(getHotwaterEndpoint() + "2", "PATCH", payload)
 }
 
 def turnHotWaterOn() {
-	log.debug "turnHotWateOn()"
+	if (showDebug) log.debug "turnHotWateOn()"
     def payload
     state.action = "HotWaterOn"
     payload = "{\"RequestOverride\":{\"Type\":\"Manual\",\"SetPoint\":1100}}"
@@ -445,7 +450,7 @@ def turnHotWaterOn() {
 }
 
 def turnHotWaterOff() {
-	log.debug "turnHotWateOff()"
+	if (showDebug) log.debug "turnHotWateOff()"
     def payload
     state.action = "HotWaterOff"
     payload = "{\"RequestOverride\":{\"Type\":\"Manual\",\"SetPoint\":-200}}"
