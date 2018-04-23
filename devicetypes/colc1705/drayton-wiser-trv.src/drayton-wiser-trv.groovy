@@ -95,7 +95,7 @@ def spUp() {
 	logEvent("spUp()")
     def currentSP = device.currentState("heatingSetPoint").getDoubleValue()
     def newSP = currentSP + 0.5
-    loglogEvent("Current setting: " + currentSP)
+    logEvent("Current setting: " + currentSP)
     sendEvent(name: "heatingSetPoint", value: newSP, unit: "°C")
     parent.setPoint(device.deviceNetworkId, newSP)
     
@@ -105,7 +105,7 @@ def spDown() {
 	logEvent("spDown()")
     def currentSP = device.currentState("heatingSetPoint").getDoubleValue()
     def newSP = currentSP - 0.5
-    loglogEvent("Current setting: " + currentSP)
+    logEvent("Current setting: " + currentSP)
     sendEvent(name: "heatingSetPoint", value: newSP, unit: "°C")
     parent.setPoint(device.deviceNetworkId, newSP)
 }
