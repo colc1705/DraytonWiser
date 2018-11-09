@@ -7,6 +7,7 @@ metadata {
         attribute "mode", "string"
         attribute "boost", "string"
         attribute "demand", "number"
+        attribute "windowState", "string"
         
         command "spDown"
         command "spUp"
@@ -64,12 +65,17 @@ metadata {
             
         }
         
+        standardTile("windowState", "device.windowState", decortation: "flat", width: 2, height: 2) {
+        	state "Open", label: 'Window ${currentValue}', backgroundColor: "#BC2323"
+            state "Closed", label: 'Window ${currentValue}'
+        }
+        
         standardTile("test", "device.getHubConfig", decoration: "flat", height: 2, width: 2, inactiveLabel: false) {
             state "default", label:"Test", action:"test", icon:"", backgroundColor:"#FFFFFF"
         }
         
         main(["thermostatMulti"])
-        details(["thermostatMulti","mode","boost","demand"])
+        details(["thermostatMulti","mode","boost","demand","windowState"])
 	}
 }
 
@@ -125,6 +131,11 @@ def setMode(mode) {
 def setBoost(boost) {
 	logEvent("setBoost($boost)")
     sendEvent(name: "boost", value: boost)
+}
+
+def setWindowState(wState) {
+	logEvent("setWindowState($wState)")
+    sendEvent(name: "windowState", value: wState)
 }
     
 def autoMode() {
