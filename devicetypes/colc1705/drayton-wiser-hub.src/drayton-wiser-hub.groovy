@@ -9,12 +9,15 @@ metadata {
         
         attribute "eco", "string"
         attribute "mode", "string"
+        attribute "comfort", "string"
         
         command "test"
         command "ecoOn"
         command "ecoOff"
         command "homeMode"
         command "awayMode"
+        command "comfortOn"
+        command "comfortOff"
 	}
 
 	simulator {
@@ -40,13 +43,18 @@ metadata {
             state "home", label: "Home", action: "awayMode", icon: "st.Home.home2"
         }
         
+        standardTile("comfort", "device.comfort", inactiveLavel: false, decoration: "flat", width: 3, height: 3) {
+        	state "true", label: "On", action: "comfortOff", icon:"st.Home.home22", backgroundColor:"#00A042"
+            state "false", label: "Comfort Off", action: "comfortOn", icon: ""
+        }
+        
         standardTile("test", "device.test", decoration: "flat", height: 2, width: 2, inactiveLabel: false) {
             state "default", label:"Test", action:"test", icon:"", backgroundColor:"#FFFFFF"
         }
         
        
 		main(["mode"])
-        details(["mode","eco"])//,"test", "refresh"])
+        details(["mode","eco","comfort"])//,"test", "refresh"])
         
         //Uncomment below for V1 tile layout
 		//details(["thermostat", "mode_auto", "mode_manual", "mode_off", "heatingSetpoint", "heatSliderControl", "boost", "boostSliderControl", "refresh"])
@@ -116,6 +124,16 @@ def setMode(mode) {
     
 }
 
+def setComfort(mode) {
+	logEvent("setComfort($mode)")
+    if (mode) {
+    	sendEvent(name: "comfort", value: "true")
+    } else {
+    	sendEvent(name: "comfort", value: "false")
+    }
+
+}
+
 def ecoOn() {
 	logEvent("ecoOn()")
     parent.setEcoMode(true)
@@ -124,6 +142,16 @@ def ecoOn() {
 def ecoOff() {
 	logEvent("ecoOff()")
     parent.setEcoMode(false)
+}
+
+def comfortOn() {
+	logEvent("comfortOn()")
+    parent.setComfort(true)
+}
+
+def comfortOff() {
+	logEvent("comfortOff()")
+    parent.setComfort(false)
 }
 
 def homeMode() {
