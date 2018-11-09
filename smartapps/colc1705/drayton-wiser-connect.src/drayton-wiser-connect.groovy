@@ -72,9 +72,9 @@ def showDebugInfo() {
   
 def test(dni = null) {
 	if (showDebug) log.debug "smartapp test($dni)"
-    refreshAllChildren()
-    //state.action = "test"
-    //getHubUrl("/data/domain/HotWater")
+    //refreshAllChildren()
+    state.action = "test"
+    getHubUrl("/data/v2/domain/")
 }
 
 def refreshHub(dni) {
@@ -85,7 +85,7 @@ def refreshHub(dni) {
     //log.debug state.hubConfig.System.OverrideType
     child.setMode(state.hubConfig.System.OverrideType)
     child.setEco(state.hubConfig.System.EcoModeEnabled)
-    
+    child.setComfort(state.hubConfig.System.ComfortModeEnabled)
 }
 
 def refreshChild(dni) {
@@ -115,6 +115,7 @@ def refreshChild(dni) {
                     child.setMode(room.Mode)
                     //child.setOutputState(room.ControlOutputState)
                     child.setDemand(room.PercentageDemand)
+                    child.setWindowState(room.WindowState)
                     if (room.OverrideTimeoutUnixTime) {
                     	child.setBoost("On")
                     } else {
@@ -226,6 +227,8 @@ void calledBackHandler(physicalgraph.device.HubResponse hubResponse) {
     	if (state.action.contains("setPoint")) runIn(3, "getHubConfig")
     	if (state.action == "ecoOn") getChildDevice(app.id + ":HUB").setEco(true)
     	if (state.action == "ecoOff") getChildDevice(app.id + ":HUB").setEco(false)
+        if (state.action == "comfortOn") getChildDevice(app.id + ":HUB").setComfort(true)
+        if (state.action == "comfortOff") getChildDevice(app.id + ":HUB").setComfort(false)
         if (state.action.contains("changeroomManualMode")) {
         	def roomId = state.action.split(":")[1]
         	getChildDevice(app.id + ":$roomId").setMode("Manual")
@@ -390,6 +393,14 @@ def setEcoMode(ecoMode) {
         //refresh();
 }
 
+def setComfort(comfort) {
+	if (showDebug) log.debug "setComfort($comfort)"
+    def payload
+    payload = "$comfort";
+    state.action = (comfort ? "comfortOn" : "comfortOff")
+    sendMessageToHeatHub(getSystemEndpointv2() + "ComfortModeEnabled", "PATCH", payload);
+}
+
 def getHumidity(roomStatId) {
 	if (showDebug) log.debug "getHumidity($roomStatId)"
     for (HashMap roomStat : state.hubConfig.RoomStat) {
@@ -488,6 +499,10 @@ def getHeatChannelsEndpoint() {
     
 def getSystemEndpoint() {
     return "/data/domain/System/"
+    }
+    
+def getSystemEndpointv2() {
+	return "/data/v2/domain/System/"
     }
     
 def getStationEndpoint() {
