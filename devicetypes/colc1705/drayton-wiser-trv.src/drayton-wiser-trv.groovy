@@ -116,6 +116,12 @@ def spDown() {
     parent.setPoint(device.deviceNetworkId, newSP)
 }
 
+def setHeatingSetpoint(setpoint) {
+	logEvent("setHeatingSetpoint($setpoint)")
+    sendEvent(name: "heatingSetPoint", value: setpoint, unit: "°C")
+    parent.setPoint(device.deviceNetworkId, setpoint)
+}
+
 def setTemp(temp, setPoint) {
  	logEvent(device.name + " is " + temp + "°C")
     sendEvent(name: "temperature", value: temp, unit: "°C")
