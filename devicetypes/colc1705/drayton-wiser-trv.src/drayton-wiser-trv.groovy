@@ -1,16 +1,17 @@
 metadata {
-	definition (name: "Drayton Wiser TRV", namespace: "colc1705", author: "Colin Chapman") {
+	definition (name: "Drayton Wiser TRV", namespace: "colc1705", author: "Colin Chapman", ocfDeviceType: "oic.d.thermostat", mnmn: "SmartThings", vid: "SmartThings-smartthings-Z-Wave_Thermostat") {
 		capability "Thermostat"
         capability "Sensor"
         capability "Refresh"
+        capability "Health Check"
         
         attribute "mode", "string"
         attribute "boost", "string"
         attribute "demand", "number"
         attribute "windowState", "string"
         
-        command "spDown"
-        command "spUp"
+        command "heatingSetpointup" //"spDown"
+        command "heatingSetpointDown" //"spUp"
         command "manualMode"
         command "autoMode"
         command "test"
@@ -28,7 +29,7 @@ metadata {
 	tiles {
         multiAttributeTile(name:"thermostatMulti", type:"thermostat", width:6, height:4) {
         	tileAttribute("device.temperature", key: "PRIMARY_CONTROL") {
-            	attributeState("default", label:'${currentValue}°C', unit:"°C", backgroundColors:[
+            	attributeState("default", label:'${currentValue}°C', unit:"C", backgroundColors:[
                     [value:  0, color: "#153591"],
                 	[value:  7, color: "#1E9CBB"],
                 	[value: 15, color: "#90D2A7"],
@@ -36,14 +37,14 @@ metadata {
                 	[value: 29, color: "#F1D801"],
                 	[value: 33, color: "#D04E00"],
                 	[value: 36, color: "#BC2323"]
-                    ])
+                    ], icon: "st.Weather.weather2")
             }
-            tileAttribute("device.heatingSetPoint", key: "VALUE_CONTROL") {
-            	attributeState("VALUE_UP", action: "spUp")
-                attributeState("VALUE_DOWN", action: "spDown")
+            tileAttribute("device.heatingSetpoint", key: "VALUE_CONTROL") {
+            	attributeState("VALUE_UP", action: "heatingSetpointUp")
+                attributeState("VALUE_DOWN", action: "heatingSetpointDown")
             }
             
-            tileAttribute("device.heatingSetPoint", key: "HEATING_SETPOINT") {
+            tileAttribute("device.heatingSetpoint", key: "HEATING_SETPOINT") {
             	attributeState("default", label: '${currentValue}', unit: "°C")
             }
             
@@ -97,36 +98,39 @@ def test() {
     parent.test(device.deviceNetworkId)
 }
 
-def spUp() {
-	logEvent("spUp()")
-    def currentSP = device.currentState("heatingSetPoint").getDoubleValue()
+def heatingSetpointUp() {
+	logEvent("heatingSetpointUp()")
+    def currentSP = device.currentState("heatingSetpoint").getDoubleValue()
     def newSP = currentSP + 0.5
     logEvent("Current setting: " + currentSP)
-    sendEvent(name: "heatingSetPoint", value: newSP, unit: "°C")
+    sendEvent(name: "heatingSetpoint", value: newSP, unit: "C", state: "heat")
+    sendEvene(name: "thermostatSetpoint", value: newSP, unit: "C", state: "heat")
     parent.setPoint(device.deviceNetworkId, newSP)
     
 }
 
-def spDown() {
-	logEvent("spDown()")
-    def currentSP = device.currentState("heatingSetPoint").getDoubleValue()
+def heatingSetpointDown() {
+	logEvent("heatingSetpointDown()")
+    def currentSP = device.currentState("heatingSetpoint").getDoubleValue()
     def newSP = currentSP - 0.5
     logEvent("Current setting: " + currentSP)
-    sendEvent(name: "heatingSetPoint", value: newSP, unit: "°C")
+    sendEvent(name: "heatingSetpoint", value: newSP, unit: "C", state: "heat")
+    sendEvent(name: "thermostatSetpoint", value: newSP, unit: "C", state: "heat")
     parent.setPoint(device.deviceNetworkId, newSP)
 }
 
 def setHeatingSetpoint(setpoint) {
 	logEvent("setHeatingSetpoint($setpoint)")
-    sendEvent(name: "heatingSetPoint", value: setpoint, unit: "°C")
+    sendEvent(name: "heatingSetpoint", value: setpoint, unit: "C", state: "heat")
+    sendEvent(name: "thermostatSetpoint", value: setpoint, unit: "C", state: "heat")
     parent.setPoint(device.deviceNetworkId, setpoint)
 }
 
 def setTemp(temp, setPoint) {
  	logEvent(device.name + " is " + temp + "°C")
-    sendEvent(name: "temperature", value: temp, unit: "°C")
-    sendEvent(name: "heatingSetPoint", value: setPoint, unit: "°C")
-    
+    sendEvent(name: "temperature", value: temp, unit: "C", state: "heat")
+    sendEvent(name: "heatingSetpoint", value: setPoint, unit: "C", state: "heat")
+    sendEvent(name: "thermostatSetpoint", value: setpoint, unit: "C", state: "heat")
 }
 
 def setMode(mode) {
